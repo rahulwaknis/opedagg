@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Op-Ed Network</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="edition-line">
+      <span id="edition-date">Today</span>
+      <span>Opinion monitor</span>
+    </div>
+    <h1>Op-Ed Network</h1>
+  </header>
+
+  <main>
+    <section class="lead-strip" aria-live="polite">
+      <p id="generated-at" class="timestamp">Loading edition...</p>
+    </section>
+
+    <section id="topics" class="topic-grid" aria-live="polite"></section>
+  </main>
+
+  <template id="topic-template">
+    <article class="topic-block">
+      <div class="topic-head">
+        <div>
+          <h3></h3>
+        </div>
+        <div class="topic-stats"></div>
+      </div>
+      <div class="article-list"></div>
+    </article>
+  </template>
+
+  <template id="article-template">
+    <article class="article-item">
+      <a class="headline" target="_blank" rel="noreferrer"></a>
+      <p class="meta"></p>
+      <p class="summary"></p>
+      <div class="tags"></div>
+    </article>
+  </template>
+
+  <script src="/app.js"></script>
+</body>
+</html>

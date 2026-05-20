@@ -1,0 +1,20 @@
+services:
+  - type: web_service
+    name: op-ed-network
+    env: python
+    region: oregon
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn api:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PORT
+        value: 10000
+    autoDeploy: true
+
+cron:
+  - name: rss-refresh
+    schedule: "0 * * * *"
+    command: python rss_ingest.py
+    env: python
+    region: oregon
+    plan: starter
