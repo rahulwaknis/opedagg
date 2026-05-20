@@ -45,6 +45,7 @@ Deploying on Render (GUI)
 3. Render will read `render.yaml` and create the web service and scheduled job:
    - Web service uses `gunicorn api:app --bind 0.0.0.0:$PORT`
    - Cron job runs `python rss_ingest.py` every hour (see `render.yaml`)
+   - Note: do not manually override `PORT` in Render; the platform injects it automatically.
 4. Enable auto-deploy if desired.
 5. Add a custom domain in Render if you want a branded URL.
 
