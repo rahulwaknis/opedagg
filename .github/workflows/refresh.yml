@@ -1,0 +1,21 @@
+name: Hourly RSS Refresh
+
+on:
+  schedule:
+    # Run every 6 hours at minute 0
+    - cron: '0 */6 * * *'
+  # Also allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger RSS refresh on Render
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            "${{ secrets.RENDER_APP_URL }}/api/refresh" \
+            -d '{}'
+        env:
+          RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
