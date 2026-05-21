@@ -13,9 +13,18 @@ jobs:
     steps:
       - name: Trigger RSS refresh on Render
         run: |
+          set -e
+          if [ -z "$RENDER_APP_URL" ]; then
+            echo "ERROR: RENDER_APP_URL is not set. Add it to repo secrets."
+            exit 1
+          fi
+          if [[ "$RENDER_APP_URL" != http*://* ]]; then
+            echo "ERROR: RENDER_APP_URL must be a full URL like https://your-app.onrender.com"
+            exit 1
+          fi
           curl -X POST \
             -H "Content-Type: application/json" \
-            "${{ secrets.RENDER_APP_URL }}/api/refresh" \
+            "$RENDER_APP_URL/api/refresh" \
             -d '{}'
         env:
           RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
