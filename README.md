@@ -24,9 +24,10 @@ This repository runs a Flask web app with a static frontend and a SQLite datasto
    gunicorn api:app --bind 0.0.0.0:$PORT
    ```
 
-3. Schedule RSS ingestion separately
-   - Run `python rss_ingest.py` periodically (for example, every 30 minutes)
-   - This is required so `api.py` has fresh article data to serve
+3. Schedule RSS ingestion through GitHub Actions
+   - `.github/workflows/refresh.yml` runs `python rss_ingest.py` every 6 hours
+   - If `opinion_articles.db` changes, the workflow commits and pushes the new DB
+   - Render auto-deploys that commit, so the web service starts with the latest data
 
 ### Rebuild behavior
 
@@ -38,20 +39,21 @@ This repository runs a Flask web app with a static frontend and a SQLite datasto
 
 - The app writes data to `opinion_articles.db` in the same folder.
 - Many cloud hosts treat local disk as ephemeral, so choose a host with persistent storage or migrate to a managed database later.
-   - For Render, a single instance with local `opinion_articles.db` is acceptable for a prototype.
+   - For Render, keep `opinion_articles.db` committed if GitHub is the deployment source of truth.
+   - A Render scheduled job runs in its own environment and should not be relied on to update the web service's local SQLite file.
 
 ## Lightweight cloud deployment options
 
 ### 1. Render
 - Simple app deploy from GitHub
 - Use `requirements.txt` and `Procfile`
-- Add a Scheduled Job for `python rss_ingest.py`
+- Let GitHub Actions refresh and commit `opinion_articles.db`
 - Good for low configuration
 
 #### Render manifest
 
 If you want a repeatable Render deploy, use `render.yaml` in the repo root.
-It defines the web service and a scheduled job to refresh feeds every 30 minutes.
+It defines the web service. The RSS refresh workflow lives in `.github/workflows/refresh.yml`.
 
 ### 2. Railway
 - Easy Python service deploy
@@ -88,5 +90,5 @@ For a very light configuration, deploy directly with `requirements.txt` and `Pro
 - Connect it to Render/Railway
 - Use `requirements.txt`
 - Use `Procfile`
-- Add a scheduler for `python rss_ingest.py`
+- Enable the GitHub Actions RSS refresh workflow
 - Verify the app can read/write `opinion_articles.db`

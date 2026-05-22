@@ -7,11 +7,3 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn api:app --bind 0.0.0.0:$PORT
     autoDeploy: true
-
-cron:
-  - name: rss-refresh
-    schedule: "0 * * * *"
-    command: python rss_ingest.py
-    env: python
-    region: oregon
-    plan: starter

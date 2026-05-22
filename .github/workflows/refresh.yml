@@ -1,4 +1,4 @@
-name: Hourly RSS Refresh
+name: RSS Refresh
 
 on:
   schedule:
@@ -7,24 +7,37 @@ on:
   # Also allow manual trigger from GitHub Actions UI
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger RSS refresh on Render
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
         run: |
-          set -e
-          if [ -z "$RENDER_APP_URL" ]; then
-            echo "ERROR: RENDER_APP_URL is not set. Add it to repo secrets."
-            exit 1
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Rebuild article database
+        run: python rss_ingest.py
+
+      - name: Commit refreshed database
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add opinion_articles.db
+          if git diff --cached --quiet; then
+            echo "No database changes to commit."
+            exit 0
           fi
-          if [[ "$RENDER_APP_URL" != http*://* ]]; then
-            echo "ERROR: RENDER_APP_URL must be a full URL like https://your-app.onrender.com"
-            exit 1
-          fi
-          curl -X POST \
-            -H "Content-Type: application/json" \
-            "$RENDER_APP_URL/api/refresh" \
-            -d '{}'
-        env:
-          RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
+          git commit -m "Refresh RSS article database"
+          git push
