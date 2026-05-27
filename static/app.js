@@ -1,6 +1,7 @@
 const views = {
   current: {
-    endpoint: "/api/current-topics?limit=8&articles_per_topic=5"
+    endpoint: "/api/current-topics?limit=8&articles_per_topic=5",
+    fallbackEndpoint: "/api/hot-topics?days=30&limit=8&articles_per_topic=5"
   }
 };
 
@@ -86,11 +87,40 @@ function renderTopics(data) {
     const articleList = node.querySelector(".article-list");
 
     title.textContent = topic.topic;
-    stats.innerHTML = `
-      <strong>${topic.article_count}</strong> links<br>
+
+    const linksButton = document.createElement("button");
+    linksButton.className = "topic-links-button";
+    linksButton.type = "button";
+    linksButton.innerHTML = `<strong>${topic.article_count}</strong> links`;
+    linksButton.addEventListener("click", async () => {
+      linksButton.disabled = true;
+
+      try {
+        const params = new URLSearchParams({
+          topic: topic.topic,
+          days: data.window_days,
+          limit: topic.article_count
+        });
+        const response = await fetch(`/api/articles?${params}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const articleData = await response.json();
+        articleList.innerHTML = "";
+        articleData.articles.forEach((article) => {
+          articleList.appendChild(renderArticle(article));
+        });
+        linksButton.innerHTML = `Showing all <strong>${topic.article_count}</strong> links`;
+      } catch (error) {
+        linksButton.disabled = false;
+      }
+    });
+
+    stats.appendChild(linksButton);
+    stats.insertAdjacentHTML("beforeend", `
+      <br>
       <strong>${topic.source_count}</strong> sources<br>
       score ${topic.score}
-    `;
+    `);
 
     topic.articles.forEach((article) => {
       articleList.appendChild(renderArticle(article));
@@ -105,9 +135,16 @@ async function loadView(viewName) {
   setLoading();
 
   try {
-    const response = await fetch(view.endpoint);
+    let response = await fetch(view.endpoint);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+    let data = await response.json();
+
+    if (!data.topics.length && view.fallbackEndpoint) {
+      response = await fetch(view.fallbackEndpoint);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      data = await response.json();
+    }
+
     generatedAt.textContent = `Updated ${formatDate(data.generated_at)}`;
     renderTopics(data);
   } catch (error) {

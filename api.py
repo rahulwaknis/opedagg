@@ -399,7 +399,7 @@ def hot_topics():
 def articles():
     init_db()
     days = parse_int(request.args.get("days"), default=14, minimum=1, maximum=90)
-    limit = parse_int(request.args.get("limit"), default=50, minimum=1, maximum=200)
+    limit = parse_int(request.args.get("limit"), default=50, minimum=1, maximum=2000)
     topic_filter = request.args.get("topic")
 
     recent_articles = load_recent_articles(days)

@@ -139,6 +139,26 @@ h3 {
   text-align: right;
 }
 
+.topic-links-button {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  line-height: inherit;
+  text-align: right;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.topic-links-button:disabled {
+  color: var(--muted);
+  cursor: default;
+  text-decoration: none;
+}
+
 .article-list {
   display: grid;
   gap: 0;
